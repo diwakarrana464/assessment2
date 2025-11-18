@@ -1,118 +1,111 @@
-Real-Time Session-Based Auth System (MEVN Stack)
+# Real-Time Session-Based Auth System (MEVN Stack)
 
-📖 Click here to read the detailed System Architecture
 
-A full-stack application built for Assessment 2, demonstrating secure session-based authentication, role-based access control, and a real-time WebSocket dashboard using MongoDB, Express, Vue 3, and Node.js.
+A full-stack application built demonstrating **secure session-based authentication**, **role-based access control**, and a **real-time WebSocket dashboard** using **MongoDB, Express, Vue 3, and Node.js**.
 
-📦 Prerequisites
+---
 
-Before running this project, ensure you have the following installed:
+## 📘 System Architecture  
+👉 *Click here to read the detailed System Architecture*  
+[Architecture Documentation](./ARCHITECTURE.md)
 
-Node.js (v14 or higher)
+---
 
-MongoDB (Must be installed and running locally on port 27017)
+## 📦 Prerequisites
 
-🚀 Setup Instructions
+Before running the project, ensure the following are installed:
 
-1. Clone the Repository
+- **Node.js** (v14 or higher)
+- **MongoDB** (running locally on `mongodb://localhost:27017`)
 
-git clone <YOUR_REPO_URL>
+---
+
+## 🚀 Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/diwakarrana464/assessment2.git
 cd assessment2
-
-
-2. Backend Setup (Server)
-
-The backend runs on port 5000.
-
-Navigate to the server folder:
-
+```
+### 2. Backend Setup (Server)
+The backend runs on port 5000.   
+Navigate to the server folder and install dependencies:
+```bash
 cd server
-
-
-Install dependencies:
-
 npm install
-
-
-Configure Environment Variables:
-Create a file named .env in the server/ folder and paste the following:
-
+```
+### 3. Configure Environment Variables:
+Create a file named `.env` in the `server/` folder and paste the following:
+```bash
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/assessment2
 SESSION_SECRET=mySuperSecretAssessmentKey
 CLIENT_URL=http://localhost:5173
+```
 
-
-Start the Server:
-
+### 4. Start the Server:
+```bash
 node index.js
-
-
-Success Message: Server running on port 5000 and MongoDB Connected.
-
-3. Frontend Setup (Client)
+```
+Success Message: `Server running on port 5000` and `MongoDB Connected.`
+### 5. Frontend Setup (Client)
 
 The frontend runs on port 5173 (Vite default).
 
-Open a new terminal window.
+*Open a new terminal window.*
 
-Navigate to the client folder:
-
+**Navigate to the client folder, install dependencies, Start the Vue App**
+```bash
 cd client
-
-
-Install dependencies:
-
 npm install
-
-
-Start the Vue App:
-
 npm run dev
-
-
+```
 Open your browser to: http://localhost:5173
 
-🧪 How to Test
+## 🧪 How to Test
 
-1. Default Credentials
 
-If you have not seeded the database via Postman, you can use the registration endpoint or use these accounts (if previously created):
+### 1. Setup Postman & Create Test Accounts
+The core requirement is to test the API endpoints first, which allows you to create the necessary Admin and User accounts in the database.
 
-Role
+1.  **Import Postman Collection:**
+    Open Postman, click **Import**, and select the file located at `postman_collection.json`. This populates all saved endpoints.
 
-Username
+2.  **Create Admin Account:**
+    * Find the **'Register'** endpoint in the Postman collection.
+    * Send a `POST` request with the following JSON body to create your Admin:
+        ```json
+        {
+          "username": "admin_boss",
+          "password": "securepassword99",
+          "role": "admin"
+        }
+        ```
 
-Password
+3.  **Create Standard User Account:**
+    * Use the same **'Register'** endpoint.
+    * Send a `POST` request with the following JSON body:
+        ```json
+        {
+          "username": "user_worker",
+          "password": "workerpassword11",
+          "role": "user"
+        }
+        ```
 
-Result
+### 2. Testing Role-Based Redirection
+Once the accounts are created, you can test the frontend UI. Open your browser to http://localhost:5173.
 
-Admin
+| Account | Username | Password | Expected Result |
+|---|---|---|---|
+| **Admin** | `admin_boss` | `securepassword99` | Redirects to `/admin-dashboard` (Live Monitoring) |
+| **User** | `user_worker` | `workerpassword11` | Redirects to `/dashboard` (Welcome Screen) |
 
-admin_dave
+### 3. Testing Real-Time Features (Core Assessment Requirement)
+This confirms the Socket.IO mapping is correctly updating the Admin view.
 
-securepassword123
+1.  Open **Browser Tab1** and log in as the **Admin** (`admin_boss`).
+2.  Open an **Browser Tab2** browser window (or Incognito/Firefox) and log in as the **User** (`user_worker`).
+3.  **Observation:** Look at the Admin's dashboard. The User will appear in the table **instantly** without refreshing the page.
+4.  **Test Disconnect:** Close the User's browser tab. The entry will vanish from the Admin table automatically.
 
-Redirects to Admin Dashboard (Live Monitoring)
-
-User
-
-user_alice
-
-password123
-
-Redirects to User Dashboard (Welcome Screen)
-
-2. Testing Real-Time Features
-
-Open Chrome and login as Admin.
-
-Open an Incognito Window (or a different browser) and login as User.
-
-Observe: The Admin dashboard table will instantly update to show the new user.
-
-Test Disconnect: Close the User's tab. The entry will vanish from the Admin dashboard automatically.
-
-3. API Testing
-
-A Postman collection is located in postman/assessment2.collection.json. Import this into Postman to test the API endpoints independently.
