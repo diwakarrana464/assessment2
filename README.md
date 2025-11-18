@@ -1,41 +1,118 @@
-# Real-Time Session-Based Auth System (MEVN Stack)
+Real-Time Session-Based Auth System (MEVN Stack)
 
-This project is a full-stack application developed for **Assessment 2**. It demonstrates a secure, session-based authentication system with role-based access control and a real-time WebSocket dashboard using the **MEVN stack** (MongoDB, Express, Vue 3, Node.js).
+📖 Click here to read the detailed System Architecture
 
----
+A full-stack application built for Assessment 2, demonstrating secure session-based authentication, role-based access control, and a real-time WebSocket dashboard using MongoDB, Express, Vue 3, and Node.js.
 
-## 🏗️ Architecture Explanation
+📦 Prerequisites
 
-### 1. Session-Based Authentication (No JWTs)
-[cite_start]Per the assessment requirements[cite: 7], this system uses stateful sessions instead of stateless JWTs.
-* [cite_start]**Flow:** When a user logs in, the server creates a session object stored persistently in **MongoDB** (using `connect-mongo`)[cite: 8].
-* **Cookies:** A secure, HTTP-only cookie (`connect.sid`) is sent to the client. [cite_start]The frontend (Vue) automatically includes this cookie in every Axios request (`withCredentials: true`) to authenticate[cite: 37].
+Before running this project, ensure you have the following installed:
 
-### 2. Real-Time Socket Mapping
-[cite_start]To fulfill the requirement of tracking active users live[cite: 29], the backend maintains an **In-Memory Map**:
-* **Structure:** `Map<SocketID, UserData>`
-* **Logic:** When a user logs in and connects via Socket.io, their socket ID is mapped to their session username and role.
-* [cite_start]**Updates:** If a user closes their tab or logs out, the `disconnect` event fires, removing them from the Map and instantly broadcasting the updated list to the Admin Dashboard[cite: 20].
+Node.js (v14 or higher)
 
-### 3. Role-Based Routing
-* **Frontend:** Vue Router uses global navigation guards (`beforeEach`) to check the Pinia store state.
-    * [cite_start]**Admins** are redirected to `/admin-dashboard`[cite: 14].
-    * [cite_start]**Users** are redirected to `/dashboard`[cite: 16].
-    * Unauthenticated users are forced to `/login`.
+MongoDB (Must be installed and running locally on port 27017)
 
----
+🚀 Setup Instructions
 
-## 📦 Project Structure
+1. Clone the Repository
 
-```text
-assessment2/
-├── client/            # Vue 3 + Vite Frontend
-│   ├── src/stores/    # Pinia State Management
-│   ├── src/router/    # Vue Router (Role Guards)
-│   └── src/views/     # Dashboard Components
-├── server/            # Node.js + Express Backend
-│   ├── config/        # DB Connection
-│   ├── models/        # Mongoose Schemas
-│   ├── socket/        # Real-time Socket Handler
-│   └── index.js       # Entry Point
-└── postman/           # API Test Collection
+git clone <YOUR_REPO_URL>
+cd assessment2
+
+
+2. Backend Setup (Server)
+
+The backend runs on port 5000.
+
+Navigate to the server folder:
+
+cd server
+
+
+Install dependencies:
+
+npm install
+
+
+Configure Environment Variables:
+Create a file named .env in the server/ folder and paste the following:
+
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/assessment2
+SESSION_SECRET=mySuperSecretAssessmentKey
+CLIENT_URL=http://localhost:5173
+
+
+Start the Server:
+
+node index.js
+
+
+Success Message: Server running on port 5000 and MongoDB Connected.
+
+3. Frontend Setup (Client)
+
+The frontend runs on port 5173 (Vite default).
+
+Open a new terminal window.
+
+Navigate to the client folder:
+
+cd client
+
+
+Install dependencies:
+
+npm install
+
+
+Start the Vue App:
+
+npm run dev
+
+
+Open your browser to: http://localhost:5173
+
+🧪 How to Test
+
+1. Default Credentials
+
+If you have not seeded the database via Postman, you can use the registration endpoint or use these accounts (if previously created):
+
+Role
+
+Username
+
+Password
+
+Result
+
+Admin
+
+admin_dave
+
+securepassword123
+
+Redirects to Admin Dashboard (Live Monitoring)
+
+User
+
+user_alice
+
+password123
+
+Redirects to User Dashboard (Welcome Screen)
+
+2. Testing Real-Time Features
+
+Open Chrome and login as Admin.
+
+Open an Incognito Window (or a different browser) and login as User.
+
+Observe: The Admin dashboard table will instantly update to show the new user.
+
+Test Disconnect: Close the User's tab. The entry will vanish from the Admin dashboard automatically.
+
+3. API Testing
+
+A Postman collection is located in postman/assessment2.collection.json. Import this into Postman to test the API endpoints independently.
