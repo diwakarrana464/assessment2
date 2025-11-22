@@ -2,18 +2,15 @@
 import { onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
-import { socket } from '../socket'; // Import the instance we just created
+import { socket } from '../socket';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
-// LIFECYCLE: Connect when entering the dashboard
 onMounted(() => {
   if (authStore.user) {
-    // 1. Open the connection
+
     socket.connect();
-    
-    // 2. Tell the server who we are (so Admin can see us)
     socket.emit('user-connected', {
       username: authStore.user.username,
       role: authStore.user.role
@@ -21,15 +18,14 @@ onMounted(() => {
   }
 });
 
-// LIFECYCLE: Disconnect when leaving
 onUnmounted(() => {
   socket.disconnect();
 });
 
-// Logout Logic
+//Logout Logic
 const handleLogout = async () => {
   await authStore.logout();
-  socket.disconnect(); // Ensure socket is cut
+  socket.disconnect();
   router.push('/login');
 };
 </script>

@@ -6,28 +6,21 @@ import { useRouter } from 'vue-router';
 const authStore = useAuthStore();
 const router = useRouter();
 
-// Reactive variables for the form
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
 
 const handleLogin = async () => {
   try {
-    // Reset error
     errorMessage.value = '';
-    
-    // Call the store action defined in authStore.js
-    // This sends the POST request to /api/auth/login
     const role = await authStore.login(username.value, password.value);
 
-    // Redirect based on Role [cite: 13]
     if (role === 'admin') {
       router.push('/admin-dashboard');
     } else {
       router.push('/dashboard');
     }
   } catch (err) {
-    // If backend returns 401, show error
     console.error(err);
     errorMessage.value = err.response?.data?.message || 'Login failed';
   }
@@ -65,10 +58,6 @@ const handleLogin = async () => {
 
         <button type="submit">Sign In</button>
       </form>
-      
-      <p class="hint">
-        Try: <strong>admin_dave</strong> or <strong>user_alice</strong>
-      </p>
     </div>
   </div>
 </template>
@@ -114,7 +103,7 @@ input {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  box-sizing: border-box; /* Ensures padding doesn't break width */
+  box-sizing: border-box; 
 }
 
 button {

@@ -15,16 +15,14 @@ const formatTime = (dateString) => {
 };
 
 onMounted(() => {
-  // 1. Connect to the socket server
-  socket.connect();
 
-  // 2. Identify ourselves as Admin so we are part of the network
+  socket.connect();
   socket.emit('user-connected', {
     username: authStore.user?.username,
     role: 'admin'
   });
 
-  // 3. LISTEN: When the server sends the updated list (Login/Logout/Disconnect)
+  //When the server sends the updated list (Login/Logout/Disconnect)
   socket.on('update-user-list', (users) => {
     console.log('Received live update:', users);
     connectedUsers.value = users;

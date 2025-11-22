@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import api from '../api/axios'; // Import our configured axios instance
+import api from '../api/axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -9,7 +9,7 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
-    // 1. Check Session (Run this when the app starts)
+    //Check Session (Run this when the app starts)
     async checkSession() {
       try {
         const res = await api.get('/me'); // Calls the /me endpoint we tested in Postman
@@ -23,15 +23,15 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    // 2. Login Action
+    //Login Action
     async login(username, password) {
       const res = await api.post('/login', { username, password });
       this.user = res.data.user;
       this.isAuthenticated = true;
-      return this.user.role; // Return role so the component knows where to redirect
+      return this.user.role;
     },
 
-    // 3. Logout Action
+    //Logout Action
     async logout() {
       await api.post('/logout');
       this.user = null;
