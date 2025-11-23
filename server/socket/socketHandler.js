@@ -1,8 +1,8 @@
-// Key: socket.id, Value: { username, role, etc. }
 const activeUsers = new Map();
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
+    
     console.log('New client connected:', socket.id);
 
     //User Login / Connection
