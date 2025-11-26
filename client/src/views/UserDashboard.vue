@@ -9,12 +9,11 @@ const router = useRouter();
 
 onMounted(() => {
   if (authStore.user) {
-
     socket.connect();
-    socket.emit('user-connected', {
-      username: authStore.user.username,
-      role: authStore.user.role
-    });
+    // socket.emit('user-connected', {
+    //   username: authStore.user.username,
+    //   role: authStore.user.role
+    // });
   }
 });
 

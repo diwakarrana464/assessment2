@@ -17,10 +17,10 @@ const formatTime = (dateString) => {
 onMounted(() => {
 
   socket.connect();
-  socket.emit('user-connected', {
-    username: authStore.user?.username,
-    role: 'admin'
-  });
+  // socket.emit('user-connected', {
+  //   username: authStore.user?.username,
+  //   role: 'admin'
+  // });
 
   //When the server sends the updated list (Login/Logout/Disconnect)
   socket.on('update-user-list', (users) => {
