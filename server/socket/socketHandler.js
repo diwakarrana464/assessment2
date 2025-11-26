@@ -2,7 +2,7 @@ const activeUsers = new Map();
 
 module.exports = (io) => {
   io.on('connection', (socket) => {
-    
+
     console.log('New client connected:', socket.id);
 
     //User Login / Connection
@@ -15,11 +15,16 @@ module.exports = (io) => {
         connectedAt: new Date()
       });
 
+      // if role is admin join to admin room if exists
+      if (userData.role === 'admin') {
+        socket.join('admins');
+      }
+
       //debugging............................................
       console.log(`User mapped: ${userData.username} -> ${socket.id}`);
 
       // Broadcast the updated list to all Admins
-      broadcastActiveUsers();
+      targetedBroadcastToAdminsOnly();
     });
 
     //User Disconnects (Tab closed or Logout)
@@ -30,7 +35,7 @@ module.exports = (io) => {
         
         activeUsers.delete(socket.id);
         
-        broadcastActiveUsers();
+        targetedBroadcastToAdminsOnly();
       }
     });
 
@@ -38,14 +43,15 @@ module.exports = (io) => {
     socket.on('user-logout', () => {
       if (activeUsers.has(socket.id)) {
         activeUsers.delete(socket.id);
-        broadcastActiveUsers();
+        targetedBroadcastToAdminsOnly();
       }
     });
 
     
-    function broadcastActiveUsers() {
+    // Helper to broadcast active users to all admins
+    function targetedBroadcastToAdminsOnly() {
       const userList = Array.from(activeUsers.values());
-      io.emit('update-user-list', userList);
+      io.to('admins').emit('update-user-list', userList);
     }
   });
 };

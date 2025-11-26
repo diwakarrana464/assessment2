@@ -43,12 +43,12 @@ const sessionMiddleware = session({
   saveUninitialized: false, // Only save if data exists
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI, // Store sessions in 'sessions' collection
-    ttl: 14 * 24 * 60 * 60 // Session expiration (14 days)
+    ttl: 24 * 60 * 60 // Session expiration (1 day)
   }),
   cookie: {
     httpOnly: true,
     secure: false,  // (Production) for https use true
-    maxAge: 1000 * 60 * 60 * 24 // 1 Day
+    maxAge: 1000 * 60 * 60 //one hour
   }
 });
 
