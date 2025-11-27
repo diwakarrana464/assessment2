@@ -4,25 +4,24 @@ import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
-const router = useRouter();
+const router = useRouter();   // keeping this 
 
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const loading = ref(false);  // better UX during login
 
 const handleLogin = async () => {
   try {
     errorMessage.value = '';
-    const role = await authStore.login(username.value, password.value);
+    loading.value = true;
+    await authStore.login(username.value, password.value);
 
-    if (role === 'admin') {
-      router.push('/admin-dashboard');
-    } else {
-      router.push('/dashboard');
-    }
   } catch (err) {
     console.error(err);
-    errorMessage.value = err.response?.data?.message || 'Login failed';
+    errorMessage.value = err.response?.data?.message || 'Login failed. Please check server status.';
+  } finally {
+    loading.value = false;
   }
 };
 </script>

@@ -17,11 +17,6 @@ const formatTime = (dateString) => {
 onMounted(() => {
 
   socket.connect();
-  // socket.emit('user-connected', {
-  //   username: authStore.user?.username,
-  //   role: 'admin'
-  // });
-
   //When the server sends the updated list (Login/Logout/Disconnect)
   socket.on('update-user-list', (users) => {
     console.log('Received live update:', users);
@@ -70,20 +65,20 @@ const handleLogout = async () => {
             <tr>
               <th>Username</th>
               <th>Role</th>
-              <th>Socket ID (Session)</th>
+              <!-- <th>Socket ID (Session)</th> -->
               <th>Time Connected</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="user in connectedUsers" :key="user.socketId">
+            <tr v-for="user in connectedUsers" :key="user.username">
               <td class="fw-bold">{{ user.username }}</td>
               <td>
                 <span :class="['badge', user.role === 'admin' ? 'badge-admin' : 'badge-user']">
                   {{ user.role.toUpperCase() }}
                 </span>
               </td>
-              <td class="mono">{{ user.socketId }}</td>
+              <!-- <td class="mono">{{ user.socketId }}</td> -->
               <td>{{ formatTime(user.connectedAt) }}</td>
               <td><span class="status-active">Active</span></td>
             </tr>

@@ -22,8 +22,7 @@ module.exports = (io) => {
         // --- 1. MAPPING AND ROOM ASSIGNMENT ---
         
         // Map the secure user data to the active connections
-        activeUsers.set(socket.id, {
-            socketId: socket.id,
+        activeUsers.set(userSession.id, {
             userId: userSession.id, // Use the permanent ID
             username: userSession.username,
             role: userSession.role, // Use the trusted role

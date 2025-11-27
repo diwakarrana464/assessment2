@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/authStore';
 import Login from '../views/Login.vue';
 import UserDashboard from '../views/UserDashboard.vue';
 import AdminDashboard from '../views/AdminDashboard.vue';
+import SessionConflict from '../views/SessionConflict.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -11,7 +12,7 @@ const router = createRouter({
     { path: '/', redirect: '/login' },
     { path: '/login', name: 'Login', component: Login },
     { 
-      path: '/dashboard', 
+      path: '/user-dashboard', 
       name: 'UserDashboard', 
       component: UserDashboard, 
       meta: { requiresAuth: true, role: 'user' }
@@ -21,7 +22,13 @@ const router = createRouter({
       name: 'AdminDashboard', 
       component: AdminDashboard, 
       meta: { requiresAuth: true, role: 'admin' }
-    }
+    },
+    {
+        path: '/session-conflict',
+        name: 'SessionConflict',
+        component: SessionConflict,
+        meta: { requiresGuest: true } // Only accessible when not logged in
+    },
   ]
 });
 
