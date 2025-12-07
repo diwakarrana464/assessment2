@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const ActiveSession = require('../models/ActiveSession'); // <-- NEW
+const ActiveSession = require('../models/ActiveSession');
 const bcrypt = require('bcryptjs');
 
 
@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { username, password, force_logout } = req.body; // <-- Get force_logout flag
+        const { username, password, force_logout } = req.body;
 
         const user = await User.findOne({ username });
         if (!user) {

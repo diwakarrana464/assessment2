@@ -2,18 +2,19 @@
 import { onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
-import { socket } from '../socket';
+// import { socket } from '../socket';
+import ChatIcon from './ChatIcon.vue';
+import ChatWindow from './ChatWindow.vue';
+import { socket, initChatSocket } from '@/services/chatSocketService'; // 🎯 Import both
+
 
 const authStore = useAuthStore();
 const router = useRouter();
 
 onMounted(() => {
   if (authStore.user) {
+    initChatSocket(); // Initialize chat socket listeners
     socket.connect();
-    // socket.emit('user-connected', {
-    //   username: authStore.user.username,
-    //   role: authStore.user.role
-    // });
   }
 });
 
@@ -51,6 +52,8 @@ const handleLogout = async () => {
         </p>
       </div>
     </main>
+    <ChatIcon /> 
+    <ChatWindow />
   </div>
 </template>
 

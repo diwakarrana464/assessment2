@@ -31,7 +31,7 @@ const sessionMiddleware = session({
     cookie: {
         httpOnly: true,
         secure: false,  // (Production) for https use true
-        maxAge: 1000 * 60 * 60 //one hour
+        maxAge: 1000 * 60 * 60 * 24 //one day
     }
 });
 

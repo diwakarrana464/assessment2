@@ -51,7 +51,15 @@ router.beforeEach(async (to, from, next) => {
     // Redirect them to their correct home based on their actual role
     if (authStore.user?.role === 'admin')
        return next('/admin-dashboard');
-    return next('/dashboard');
+    else return next('/user-dashboard');
+  }
+
+  if (authStore.isAuthenticated && to.name === 'Login') {
+      // If already logged in, redirect them immediately to their dashboard
+      if (authStore.user.role === 'admin') {
+          return next('/admin-dashboard');
+      }
+      return next('/user-dashboard'); 
   }
 
   next();

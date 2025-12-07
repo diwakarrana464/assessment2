@@ -2,7 +2,12 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
-import { socket } from '../socket';
+// import { socket } from '../socket';
+import ChatIcon from './ChatIcon.vue';
+import ChatWindow from './ChatWindow.vue';
+// import initChatSocket from '../services/chatSocketService';
+import { socket, initChatSocket } from '@/services/chatSocketService'; // 🎯 Import both
+
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -15,8 +20,13 @@ const formatTime = (dateString) => {
 };
 
 onMounted(() => {
-
+  initChatSocket(); // Initialize chat socket listeners
   socket.connect();
+  socket.emit('user-connected', {
+    username: authStore.user?.username,
+    role: 'admin'
+  });
+
   //When the server sends the updated list (Login/Logout/Disconnect)
   socket.on('update-user-list', (users) => {
     console.log('Received live update:', users);
@@ -90,6 +100,8 @@ const handleLogout = async () => {
         </div>
       </div>
     </main>
+    <ChatIcon /> 
+    <ChatWindow />
   </div>
 </template>
 

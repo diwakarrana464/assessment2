@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '../api/axios';
+// import { socket, initChatSocket } from '@/services/chatSocketService'; // 🎯 Import both
 
 import router from '../router';
 
@@ -15,7 +16,8 @@ export const useAuthStore = defineStore('auth', {
     //Check Session (Run this when the app starts)
     async checkSession() {
       try {
-        const res = await api.get('/me'); // Calls the /me endpoint we tested in Postman
+        const res = await api.get('/me'); 
+        console.log('Session valid. User authenticated.', JSON.stringify(res.data));
         this.user = res.data.user;
         this.isAuthenticated = true;
       } catch (err) {
@@ -37,6 +39,13 @@ export const useAuthStore = defineStore('auth', {
         
         // Success: Complete login (200 OK)
         this.setAuthStatus(response.data.user);
+
+
+        // // --- CHAT INTEGRATION START ---
+        // initChatSocket(); // 1. Setup all socket listeners (chatStore logic)
+        // socket.connect(); // 2. Initiate the actual connection
+        // // --- CHAT INTEGRATION END ---get
+
         
         // Redirect based on role (Router logic would go here)
         if (response.data.user.role === 'admin') {
@@ -102,7 +111,6 @@ export const useAuthStore = defineStore('auth', {
       await api.post('/logout');
       this.user = null;
       this.isAuthenticated = false;
-      // Note: We will handle socket disconnection in the component or router later
     },
   }
 });

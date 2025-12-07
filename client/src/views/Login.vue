@@ -4,7 +4,6 @@ import { useAuthStore } from '../stores/authStore';
 import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
-const router = useRouter();   // keeping this 
 
 const username = ref('');
 const password = ref('');
@@ -55,7 +54,9 @@ const handleLogin = async () => {
           {{ errorMessage }}
         </div>
 
-        <button type="submit">Sign In</button>
+        <button type="submit" :disabled="loading">
+          {{ loading ? 'Signing In...' : 'Sign In' }}
+        </button>
       </form>
     </div>
   </div>
