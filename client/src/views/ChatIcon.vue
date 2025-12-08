@@ -2,10 +2,10 @@
   <div 
     class="chat-icon"
     @click="chatStore.toggleChat"
-    :class="{ 'pulse': chatStore.unreadCount > 0 }"
+    :class="{ 'pulse': chatStore.globalUnreadCount > 0 }"
   >
     <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm6 2a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z"></path></svg>
-    <span v-if="chatStore.unreadCount > 0" class="badge">{{ chatStore.unreadCount }}</span>
+    <span v-if="chatStore.globalUnreadCount > 0" class="badge">{{ chatStore.globalUnreadCount }}</span>
   </div>
 </template>
 

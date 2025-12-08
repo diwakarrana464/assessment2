@@ -1,9 +1,20 @@
 <script setup>
+import { useAuthStore } from './stores/authStore';
+import { useChatStore } from './stores/chatStore';
+import ChatIcon from './views/ChatIcon.vue';
+import ChatWindow from './views/ChatWindow.vue';
+
+const authStore = useAuthStore();
+const chatStore = useChatStore();
 </script>
 
 <template>
   <router-view />
-</template>
+  <template v-if="authStore.isAuthenticated">
+    <ChatWindow v-if="chatStore.chatOpen" />
+    <ChatIcon v-else />
+  </template>
+  </template>
 
 <style>
 body {

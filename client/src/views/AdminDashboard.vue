@@ -7,6 +7,7 @@ import ChatIcon from './ChatIcon.vue';
 import ChatWindow from './ChatWindow.vue';
 // import initChatSocket from '../services/chatSocketService';
 import { socket, initChatSocket } from '@/services/chatSocketService'; // 🎯 Import both
+import { removeChatListeners } from '../services/chatSocketService';
 
 
 const authStore = useAuthStore();
@@ -36,11 +37,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   // Cleanup listeners to prevent memory leaks
+  removeChatListeners();
   socket.off('update-user-list');
   socket.disconnect();
 });
 
 const handleLogout = async () => {
+  removeChatListeners();
   await authStore.logout();
   socket.disconnect();
   router.push('/login');
@@ -100,8 +103,6 @@ const handleLogout = async () => {
         </div>
       </div>
     </main>
-    <ChatIcon /> 
-    <ChatWindow />
   </div>
 </template>
 

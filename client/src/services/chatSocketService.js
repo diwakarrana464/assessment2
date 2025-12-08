@@ -44,4 +44,11 @@ export function initChatSocket() {
     // });
 }
 
+export function removeChatListeners() {
+    socket.off('targets_updated');
+    socket.off('receive_private_message');
+    socket.off('connect');
+    socket.off('disconnect');
+}
+
 export { socket };
