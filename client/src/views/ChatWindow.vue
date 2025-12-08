@@ -40,7 +40,13 @@
               :key="index" 
               :class="['message', msg.isSelf ? 'self' : 'other']"
             >
-              <span class="sender-name">{{ msg.isSelf ? 'You' : msg.senderUsername }}:</span>
+              <!-- <span class="sender-name">{{ msg.isSelf ? 'You' : msg.senderUsername }}:</span> -->
+               <span class="sender-name">
+                {{ msg.isSelf ? 'You' : msg.senderUsername }} 
+                <span class="timestamp-label">
+                    ({{ formatMessageTime(msg.timestamp) }})
+                </span>
+              :</span>
               <span class="message-text">{{ msg.message }}</span>
             </div>
           </div>
@@ -94,9 +100,23 @@ const sendMessage = () => {
         messageText.value = '';
     }
 };
+
+// Utility function to format the timestamp for display
+const formatMessageTime = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp); 
+    return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true
+    });
+};
 </script>
 
 <style scoped>
+.message-text {
+    word-wrap: break-word;
+}
 .chat-window-container {
   position: fixed;
   bottom: 20px; 

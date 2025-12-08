@@ -67,7 +67,7 @@ export const useChatStore = defineStore('chat', {
             
             const messageObject = {
                 senderId: senderId,
-                senderUsername: isSelf ? authStore.user.username : 'Partner',
+                senderUsername: isSelf ? authStore.user.username : 'Friend',
                 message: content,
                 timestamp: new Date(),
                 isSelf: isSelf
@@ -82,7 +82,7 @@ export const useChatStore = defineStore('chat', {
         // Action triggered by the Socket Service upon receiving a message
         handleIncomingMessage(payload) {
             const senderId = payload.senderId;
-            const authStore = useAuthStore();
+            // const authStore = useAuthStore();
 
             // Add the message to the persistent conversation Map
             this.addMessageToConversation(senderId, payload.recipientId, payload.message, false);

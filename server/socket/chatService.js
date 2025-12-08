@@ -1,11 +1,8 @@
-// server/socket/chatService.js (NEW FILE)
-
-// Note: activeUsers Map and io instance must be passed when imported
+// server/socket/chatService.js
 
 function getChatTargets(activeUsers, requestingUser) {
     const allActiveUsers = Array.from(activeUsers.values());
 
-    // Logic remains the same:
     if (requestingUser.role === 'admin') {
         return allActiveUsers
             .filter(u => u.userId.toString() !== requestingUser.id.toString())
@@ -21,7 +18,7 @@ function handlePrivateMessage(io, activeUsers, senderSession, payload) {
     const { recipientId, message } = payload;
     const senderUsername = senderSession.username;
     
-    // 1. Find the recipient's active socket(s)
+    //Find the recipient's active socket(s)
     const recipientSockets = Array.from(activeUsers.values())
         .filter(u => u.userId.toString() === recipientId.toString());
         
@@ -37,7 +34,7 @@ function handlePrivateMessage(io, activeUsers, senderSession, payload) {
 
     console.log('Prepared message payload for delivery:', messagePayload);
 
-    // 2. Delivery
+    //Delivery
     if (recipientSockets.length > 0) {
          recipientSockets.forEach(recipient => {
              io.to(recipient.socketId).emit('receive_private_message', messagePayload);

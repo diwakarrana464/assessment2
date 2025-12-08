@@ -3,7 +3,6 @@
 
 const activeUsers = new Map();
 const chatService = require('./chatService');
-//const { getChatTargets, handlePrivateMessage } = require('../socket/chatService');
 
 // The io object should be passed from the server setup
 module.exports = (io) => { 
@@ -28,15 +27,9 @@ module.exports = (io) => {
         }
 
         targetedBroadcastToAdminsOnly(io);
-
         pushAvailableTargetsToAll(io);
 
-        // //Delegate Target Filtering
-        // socket.on('get_available_targets', () => {
-        //     const availableTargets = chatService.getChatTargets(activeUsers, userSession);
-        //     socket.emit('available_targets_list', availableTargets);
-        // });
-
+        //................................................................................................
         //Delegate Private Messaging
         socket.on('send_private_message', (payload) => {
             // Pass all required resources to the service
@@ -80,30 +73,26 @@ module.exports = (io) => {
     }//end of targetedBroadcastToAdminsOnly
 //...................................................................................
 
-
-
 // Helper to broadcast personalized active targets to ALL connected users
 function pushAvailableTargetsToAll(ioInstance) {
     // FIX: Use ioInstance.sockets.sockets for reliable iteration over ALL live sockets
     ioInstance.sockets.sockets.forEach(socket => {
-        // 1. Check if the socket has a user ID associated (i.e., they are authenticated)
-        // We use the activeUsers map to ensure the user is fully tracked and ready.
-        const userId = socket.request.session?.user?.id; // Attempt to get the user ID from the session data attached by middleware
+        // We use the activeUsers map to ensure the user is fully tracked and ready. session is attached by middleware
+        const userId = socket.request.session?.user?.id;
         
         if (userId && activeUsers.has(userId)) {
-            const user = activeUsers.get(userId); // Get tracked data
+            const user = activeUsers.get(userId);
             
-            // 2. Generate a personalized target list for this specific user
+            //Generate a personalized target list for this specific user
             const availableTargets = chatService.getChatTargets(activeUsers, {
                 id: user.userId, 
                 role: user.role
             });
             
-            // 3. Push the personalized list ONLY to this user's specific socket ID
+            //Push the personalized list ONLY to this user's specific socket ID
             ioInstance.to(socket.id).emit('targets_updated', availableTargets);
             console.log(`Pushed personalized targets to user: ${user.username}`);
         }
-        // Sockets without a valid user ID are skipped.
     });
 }
 
