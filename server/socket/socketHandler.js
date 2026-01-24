@@ -1,99 +1,108 @@
-// NOTE: This file assumes the secure middleware (from the previous step) 
+// NOTE: This file assumes the secure middleware (from the previous step)
 // has successfully populated socket.request.session.user
 
 const activeUsers = new Map();
-const chatService = require('./chatService');
+const chatService = require("./chatService");
 
 // The io object should be passed from the server setup
-module.exports = (io) => { 
-    io.on('connection', (socket) => {
-        const userSession = socket.request.session.user; 
-        
-        if (!userSession) {
-             return socket.disconnect(true); 
-        }
+module.exports = (io) => {
+  io.on("connection", (socket) => {
+    const userSession = socket.request.session.user;
+    if (!userSession) {
+      return socket.disconnect(true);
+    }
 
-        //MAPPING AND ROOM ASSIGNMENT
-        activeUsers.set(userSession.id, {
-            userId: userSession.id,
-            username: userSession.username,
-            role: userSession.role,
-            connectedAt: new Date(),
-            socketId: socket.id
-        });
-
-        if (userSession.role === 'admin') {
-            socket.join('admins');
-        }
-
-        targetedBroadcastToAdminsOnly(io);
-        pushAvailableTargetsToAll(io);
-
-        //................................................................................................
-        //Delegate Private Messaging
-        socket.on('send_private_message', (payload) => {
-            // Pass all required resources to the service
-            const confirmation = chatService.handlePrivateMessage(
-                io, 
-                activeUsers, 
-                userSession, 
-                payload
-            );
-            console.log(`Private message processed for user: ${userSession.username}`, payload);
-            //socket.emit('message_sent_confirm', confirmation);
-            //console.log(`Sent message_sent_confirm to sender: ${userSession.username}`, confirmation);
-        });
-
-        //................................................................................................
-        // User Disconnects (Tab closed or Network issue)
-        socket.on('disconnect', () => {
-            if (activeUsers.has(userSession.id)) {
-                const user = activeUsers.get(userSession.id);
-                console.log(`User disconnected: ${user.username}`);
-                
-                activeUsers.delete(userSession.id);
-                targetedBroadcastToAdminsOnly(io);
-                pushAvailableTargetsToAll(io);
-            }
-        });
-        
-        socket.on('user-logout', () => {
-            if (activeUsers.has(userSession.id)) {
-                activeUsers.delete(userSession.id);
-                targetedBroadcastToAdminsOnly(io);
-                pushAvailableTargetsToAll(io); // 🎯 NEW CALL
-            }
-        });
-        
-    });// end of io.on connection
-//..................................................................................
-    function targetedBroadcastToAdminsOnly(ioInstance) {
-        const userList = Array.from(activeUsers.values());
-        ioInstance.to('admins').emit('update-user-list', userList);
-    }//end of targetedBroadcastToAdminsOnly
-//...................................................................................
-
-// Helper to broadcast personalized active targets to ALL connected users
-function pushAvailableTargetsToAll(ioInstance) {
-    // FIX: Use ioInstance.sockets.sockets for reliable iteration over ALL live sockets
-    ioInstance.sockets.sockets.forEach(socket => {
-        // We use the activeUsers map to ensure the user is fully tracked and ready. session is attached by middleware
-        const userId = socket.request.session?.user?.id;
-        
-        if (userId && activeUsers.has(userId)) {
-            const user = activeUsers.get(userId);
-            
-            //Generate a personalized target list for this specific user
-            const availableTargets = chatService.getChatTargets(activeUsers, {
-                id: user.userId, 
-                role: user.role
-            });
-            
-            //Push the personalized list ONLY to this user's specific socket ID
-            ioInstance.to(socket.id).emit('targets_updated', availableTargets);
-            console.log(`Pushed personalized targets to user: ${user.username}`);
-        }
+    //MAPPING AND ROOM ASSIGNMENT
+    activeUsers.set(userSession.id, {
+      userId: userSession.id,
+      username: userSession.username,
+      role: userSession.role,
+      connectedAt: new Date(),
+      socketId: socket.id,
     });
-}
 
-};//end of module.exports
+    if (userSession.role === "admin") {
+      socket.join("admins");
+    }
+    //targetedBroadcastToAdminsOnly(io);
+    chatService.targetedBroadcastToAdminsOnly(io, activeUsers);
+
+    //.........................getChatTargets and push to connected user.........................
+    socket.emit(
+      "get_chat_targets",
+      chatService.getChatTargets(activeUsers, {
+        id: userSession.id,
+        role: userSession.role,
+      })
+    );
+
+    chatService.iamActive(io, userSession);
+
+    //..................................private message event listener....................................
+    socket.on("send_private_message", async (payload) => {
+      const confirmation = await chatService.handlePrivateMessage(
+        io,
+        activeUsers,
+        userSession,
+        payload
+      );
+      // Emit confirmation back to sender only
+      if (confirmation) {
+        console.log(
+          "message is saved and delivered to recipient, sending confirmation to sender",
+          confirmation
+        );
+        io.to(socket.id).emit("private_message_confirmation", confirmation);
+      }
+    }); // end of send_private_message listener
+
+    //..................................message read update status listener....................................
+    socket.on("message_read_update_status", async (payload) => {
+      const { messageId, readerId } = payload;
+      try {
+        const result = await chatService.handleReadReceipt(messageId, readerId);
+
+        if (result && result.statusUpdatePayload) {
+          const originalSenderId = result.senderId;
+          const senderInfo = activeUsers.get(originalSenderId);
+
+          if (senderInfo) {
+            io.to(senderInfo.socketId).emit(
+              "status_update",
+              result.statusUpdatePayload
+            );
+            console.log(
+              `Sent read receipt notification to sender ID: ${originalSenderId} for message ID: ${messageId}`
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error updating message status to Read:", error);
+      }
+    }); // end of message_read_update_status listener
+
+    //...............................disconnect listener....................................
+    socket.on("disconnect", () => {
+      if (activeUsers.has(userSession.id)) {
+        const user = activeUsers.get(userSession.id);
+        console.log(`User disconnected: ${user.username}`);
+        activeUsers.delete(userSession.id);
+        //targetedBroadcastToAdminsOnly(io);
+        chatService.targetedBroadcastToAdminsOnly(io, activeUsers);
+        chatService.iamInactive(io, userSession);
+      }
+    }); // end of disconnect listener
+
+    //...............................logout listener....................................
+    socket.on("user-logout", () => {
+      if (activeUsers.has(userSession.id)) {
+        activeUsers.delete(userSession.id);
+        //targetedBroadcastToAdminsOnly(io);
+        chatService.targetedBroadcastToAdminsOnly(io, activeUsers);
+        console.log(`User logged out: ${userSession.username}`);
+        chatService.iamInactive(io, userSession);
+        console.log("iaminactive event sent on logout");
+      }
+    }); // end of logout listener
+  }); // end of io.on connection
+}; //end of module.exports

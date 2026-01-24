@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import api from '../api/axios';
 import router from '../router';
+import { socket } from '@/services/chatSocketService';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -94,9 +95,22 @@ export const useAuthStore = defineStore('auth', {
 
     //Logout Action...............................................................................................
     async logout() {
-      await api.post('/logout');
-      this.user = null;
-      this.isAuthenticated = false;
+      // 1. SIGNAL SERVER WHILE SESSION DATA IS STILL ACCESSIBLE (user ID is attached)
+    socket.emit('user-logout'); 
+    console.log("Logout signal emitted. Waiting 50ms for buffer flush...");
+
+    // 2. CRITICAL DELAY: Ensures emit gets out before connection closes
+    await new Promise(resolve => setTimeout(resolve, 50)); 
+
+    // 3. DESTROY SESSION: API Call (Irreversible Security Step)
+    await api.post('/logout'); 
+    
+    // 4. NETWORK CLEANUP
+    socket.disconnect(); 
+    
+    // 5. Clear Pinia State
+    this.user = null;
+    this.isAuthenticated = false;
     },
   }
 });

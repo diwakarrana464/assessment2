@@ -27,8 +27,8 @@ onUnmounted(() => {
 
 //Logout Logic
 const handleLogout = async () => {
-  await authStore.logout();
-  socket.disconnect();
+  await authStore.logout(); 
+  removeChatListeners();
   router.push('/login');
 };
 </script>

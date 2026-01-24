@@ -16,4 +16,6 @@ router.post('/logout', logout);
 // Protected Routes
 router.get('/me', isAuthenticated, getMe);
 
+// chat loading route 
+
 module.exports = router;

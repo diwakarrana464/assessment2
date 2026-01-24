@@ -48,6 +48,37 @@
                 </span>
               :</span>
               <span class="message-text">{{ msg.message }}</span>
+
+              <!-- MESSAGE STATUS ICONS (SINGLE/DOUBLE TICK) -->
+              <span v-if="msg.isSelf" class="message-status-icon">
+                <!-- Status 0: Sending/Pending (Red Clock) -->
+                <svg
+                  v-if="msg.status === 0"
+                  class="status-clock"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.5 13H11V7h1.5v8z" />
+                </svg>
+
+                <!-- Status 1: Delivered (Grey Double Tick) -->
+                <svg
+                  v-else-if="msg.status === 1"
+                  class="status-tick status-delivered"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M18.71 7.21a.996.996 0 0 0-1.41 0L12 12.59 7.71 8.3a.996.996 0 1 0-1.41 1.41l5 5a.996.996 0 0 0 1.41 0l6-6a.996.996 0 0 0 0-1.41zm-6-2.5a.996.996 0 1 0-1.41 0L7 9.09l-.7-.7a.996.996 0 1 0-1.41 1.41l2.71 2.71a.996.996 0 0 0 1.41 0l5-5a.996.996 0 1 0 0-1.41z" />
+                </svg>
+
+                <!-- Status 2: Read (Blue Double Tick) -->
+                <svg
+                  v-else-if="msg.status === 2"
+                  class="status-tick status-read"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M18.71 7.21a.996.996 0 0 0-1.41 0L12 12.59 7.71 8.3a.996.996 0 1 0-1.41 1.41l5 5a.996.996 0 0 0 1.41 0l6-6a.996.996 0 0 0 0-1.41zm-6-2.5a.996.996 0 1 0-1.41 0L7 9.09l-.7-.7a.996.996 0 1 0-1.41 1.41l2.71 2.71a.996.996 0 0 0 1.41 0l5-5a.996.996 0 1 0 0-1.41z" />
+                </svg>
+              </span>
+              <!-- END MESSAGE STATUS ICONS -->
             </div>
           </div>
           
@@ -222,6 +253,10 @@ const formatMessageTime = (timestamp) => {
   padding: 8px 12px;
   border-radius: 18px;
   line-height: 1.4;
+  /* position relative so the status icon can be absolutely positioned */
+  position: relative;
+  padding-right: 30px; /* space for the status icon on the right */
+  padding-bottom: 18px; /* additional space at bottom for icon */
 }
 .self {
   margin-left: auto;
@@ -267,5 +302,38 @@ const formatMessageTime = (timestamp) => {
     display: flex;
     flex-direction: column; 
     overflow: hidden; /* Prevents body scrollbar from the input field */
+}
+
+.message-status-icon {
+  position: absolute;
+  bottom: 3px; /* Position relative to the bottom of the bubble */
+  right: 5px; /* Position relative to the right edge */
+  height: 14px; /* Slightly increased size for visibility */
+  width: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10; /* Ensures the icon is rendered above the message text */
+}
+
+.status-tick,
+.status-clock {
+  height: 100%;
+  width: 100%;
+}
+
+/* Status 0: Red Clock for Sending/Failed Delivery */
+.status-clock {
+  fill: #dc3545; /* Red color for warning/pending */
+}
+
+/* Status 1: Grey Double Tick for Delivered */
+.status-delivered {
+  fill: white
+}
+
+/* Status 2: Blue Double Tick for Read */
+.status-read {
+  fill: black; /* Bright blue color */
 }
 </style>

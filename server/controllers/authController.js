@@ -41,29 +41,23 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // --- 1. SINGLE SESSION ENFORCEMENT CHECK ---
+        //SINGLE SESSION ENFORCEMENT CHECK ---
         const existingActiveSession = await ActiveSession.findOne({ userId: user._id });
 
-        // If an active session exists AND the client has NOT sent the force_logout flag
-        if (existingActiveSession && !force_logout) {
-            // Signal to the client that a conflict exists and decision is needed
+        if (existingActiveSession && !force_logout) {   
             return res.status(409).json({
                 message: 'A session is already active. Want forced Login?.',
                 code: 'SESSION_CONFLICT'
             });
         }
 
-        // --- 2. DESTRUCTION OF OLD SESSION (If conflict was resolved) ---
+        //DESTRUCTION OF OLD SESSION (If conflict was resolved) ---
         if (existingActiveSession) {
-            // Destroy old session in the persistent store (connect-mongo)
-            // req.sessionStore is available because express-session is initialized in server.js
             await req.sessionStore.destroy(existingActiveSession.sessionId);
-            // Delete the tracking record from our custom collection
             await ActiveSession.deleteOne({ _id: existingActiveSession._id });
         }
         
-        // --- 3. CREATE NEW SESSION AND TRACKING RECORD ---
-
+        //CREATE NEW SESSION AND TRACKING RECORD ---
         // Set new session data
         req.session.user = {
             id: user._id,
@@ -86,7 +80,7 @@ exports.login = async (req, res) => {
             loginTime: new Date()
         });
         
-        // --- 4. SUCCESS RESPONSE ---
+        //SUCCESS RESPONSE ---
         res.json({
             message: 'Login successful',
             user: req.session.user
@@ -107,18 +101,18 @@ exports.logout = async (req, res) => {
 
     const currentSessionId = req.session.id;
 
-    // 1. Destroy session in the persistent store
+    //Destroy session in the persistent store
     await new Promise(resolve => req.session.destroy(resolve));
 
     try {
-        // 2. Clear the tracking record from the ActiveSession collection
+        //Clear the tracking record from the ActiveSession collection
         await ActiveSession.deleteOne({ sessionId: currentSessionId });
     } catch (error) {
         // Log the error but continue to send success to client
         console.error("ActiveSession cleanup error:", error.message);
     }
 
-    // 3. Clear the cookie from the client's browser
+    //Clear the cookie from the client's browser
     res.clearCookie('connect.sid');
     res.json({ message: 'Logout successful' });
 };

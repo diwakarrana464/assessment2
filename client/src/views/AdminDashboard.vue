@@ -43,10 +43,9 @@ onUnmounted(() => {
 });
 
 const handleLogout = async () => {
-  removeChatListeners();
-  await authStore.logout();
-  socket.disconnect();
-  router.push('/login');
+   await authStore.logout(); 
+   removeChatListeners();
+   router.push('/login');
 };
 </script>
 
